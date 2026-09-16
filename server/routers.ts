@@ -3,6 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { createAuditSubmission } from "./db";
+import { askCoachFlowGemini } from "./gemini";
 import { z } from "zod";
 
 export const appRouter = router({
@@ -47,6 +48,16 @@ export const appRouter = router({
       });
       return { success: true, persisted } as const;
     }),
+  }),
+  ai: router({
+    chat: publicProcedure.input(z.object({
+      messages: z.array(z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().min(1).max(4_000),
+      })).min(1).max(12),
+    })).mutation(async ({ input }) => ({
+      content: await askCoachFlowGemini(input.messages),
+    })),
   }),
 });
 

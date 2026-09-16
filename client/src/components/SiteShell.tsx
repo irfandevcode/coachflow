@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { ArrowUpRight, Menu, X } from "lucide-react";
+import { CoachFlowChat } from "@/components/CoachFlowChat";
 
 const navItems = [
   { href: "/how-it-works", label: "How it works" },
@@ -69,6 +70,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
         )}
       </header>
       <main>{children}</main>
+      <CoachFlowChat />
       <footer className="border-t border-[#dce8f6] bg-white">
         <div className="container grid gap-12 py-14 md:grid-cols-[1.3fr_1fr_1fr_1fr] md:py-20">
           <div>

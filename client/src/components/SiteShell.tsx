@@ -11,9 +11,9 @@ const navItems = [
 
 export function Logo() {
   return (
-    <Link href="/" className="group inline-flex items-center gap-3" aria-label="Ascendra home">
-      <span className="logo-mark" aria-hidden="true">A</span>
-      <span className="text-[1.05rem] font-bold tracking-[-0.03em] text-[#0b1f3a]">Ascendra</span>
+    <Link href="/" className="group logo-link inline-flex items-center gap-3" aria-label="CoachFlow home">
+      <span className="logo-mark" aria-hidden="true">C</span>
+      <span className="text-[1.05rem] font-bold tracking-[-0.03em] text-[#0b1f3a]">CoachFlow</span>
     </Link>
   );
 }
@@ -78,7 +78,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
           </div>
           <div>
             <p className="footer-heading">Explore</p>
-            <div className="footer-links"><Link href="/how-it-works">How it works</Link><Link href="/system">The system</Link><Link href="/about">About Ascendra</Link><Link href="/insights">Insights</Link></div>
+            <div className="footer-links"><Link href="/how-it-works">How it works</Link><Link href="/system">The system</Link><Link href="/about">About CoachFlow</Link><Link href="/insights">Insights</Link></div>
           </div>
           <div>
             <p className="footer-heading">Take action</p>
@@ -87,7 +87,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <div>
             <p className="footer-heading">Fine print</p>
             <div className="footer-links"><Link href="/privacy">Privacy policy</Link><Link href="/terms">Terms of service</Link></div>
-            <p className="mt-6 text-sm text-[#91a5bd]">© 2026 Ascendra</p>
+            <p className="mt-6 text-sm text-[#91a5bd]">© 2026 CoachFlow</p>
           </div>
         </div>
         <div className="border-t border-[#edf3fa] py-4"><div className="container flex flex-col gap-2 text-xs text-[#91a5bd] sm:flex-row sm:items-center sm:justify-between"><span>Thoughtful systems. Better conversations.</span><span>For coaches building with intention.</span></div></div>

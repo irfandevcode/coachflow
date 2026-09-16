@@ -104,3 +104,45 @@
 @media (max-width: 767px) { .brand-strip { align-items: flex-start; flex-direction: column; }.brand-strip-items { flex-wrap: wrap; }.floating-note { display: none; }.pipeline-arrow { display: none; }.display-heading { font-size: clamp(2.6rem, 12vw, 4rem); } }
 
 @media (prefers-reduced-motion: no-preference) { .hero-dashboard { animation: float-in .7s cubic-bezier(.23,1,.32,1) both; } .hero-orb { animation: drift 8s ease-in-out infinite alternate; } @keyframes float-in { from { opacity: 0; transform: translateY(16px) rotate(1deg); } to { opacity: 1; transform: translateY(0) rotate(0); } } @keyframes drift { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, 10px, 0); } } }
+
+
+/* CoachFlow motion system: expressive on entry, restrained in interaction. */
+@media (prefers-reduced-motion: no-preference) {
+  .logo-link { animation: motion-fade-up .55s cubic-bezier(.23,1,.32,1) both; }
+  .nav-link { animation: motion-fade-down .45s cubic-bezier(.23,1,.32,1) both; }
+  .nav-link:nth-child(1) { animation-delay: .06s; }
+  .nav-link:nth-child(2) { animation-delay: .1s; }
+  .nav-link:nth-child(3) { animation-delay: .14s; }
+  .nav-link:nth-child(4) { animation-delay: .18s; }
+  .hero-section .container > .max-w-2xl { animation: motion-fade-up .8s .08s cubic-bezier(.23,1,.32,1) both; }
+  .page-hero .container { animation: motion-fade-up .7s .06s cubic-bezier(.23,1,.32,1) both; }
+  .hero-dashboard { animation: dashboard-in .9s .18s cubic-bezier(.23,1,.32,1) both !important; }
+  .floating-note-one { animation: float-note-one 4.5s 1s ease-in-out infinite; }
+  .floating-note-two { animation: float-note-two 5s 1.2s ease-in-out infinite; }
+  .leak-card, .process-card, .service-card, .insight-card, .result-card, .contact-item, .system-row { animation: motion-fade-up .65s both; }
+  .leak-card:nth-child(2), .process-card:nth-child(2), .service-card:nth-child(2), .insight-card:nth-child(2), .result-card:nth-child(2), .system-row:nth-child(2) { animation-delay: .08s; }
+  .leak-card:nth-child(3), .process-card:nth-child(3), .service-card:nth-child(3), .insight-card:nth-child(3), .result-card:nth-child(3), .system-row:nth-child(3) { animation-delay: .16s; }
+  .leak-card:nth-child(4), .process-card:nth-child(4), .service-card:nth-child(4), .result-card:nth-child(4), .system-row:nth-child(4) { animation-delay: .24s; }
+  .pipeline-step { animation: pipeline-pop .65s both; }
+  .pipeline-step:nth-child(1) { animation-delay: .08s; }.pipeline-step:nth-child(2) { animation-delay: .15s; }.pipeline-step:nth-child(3) { animation-delay: .22s; }.pipeline-step:nth-child(4) { animation-delay: .29s; }.pipeline-step:nth-child(5) { animation-delay: .36s; }.pipeline-step:nth-child(6) { animation-delay: .43s; }.pipeline-step:nth-child(7) { animation-delay: .50s; }
+  .pipeline-icon { transition: transform .25s cubic-bezier(.23,1,.32,1), box-shadow .25s ease; }
+  .pipeline-step:hover .pipeline-icon { transform: translateY(-6px) rotate(-4deg) scale(1.06); box-shadow: 0 16px 28px rgba(18,97,214,.22); }
+  .button svg { transition: transform .22s cubic-bezier(.23,1,.32,1); }
+  .button:hover svg { transform: translate(3px, -3px); }
+  .logo-mark { transition: transform .25s cubic-bezier(.23,1,.32,1), box-shadow .25s ease; }
+  .logo-link:hover .logo-mark { transform: rotate(-8deg) scale(1.08); box-shadow: 0 10px 25px rgba(18,97,214,.32); }
+  .service-card:hover, .process-card:hover, .insight-card:hover, .result-card:hover { transform: translateY(-5px); transition: transform .25s cubic-bezier(.23,1,.32,1), box-shadow .25s ease, border-color .25s ease; box-shadow: 0 20px 42px rgba(26,88,146,.1); }
+  .cta-panel { animation: panel-glow 5s ease-in-out infinite alternate; }
+  .score-ring, .result-score { animation: score-pulse 3.8s ease-in-out infinite; }
+  .system-stage-dot { animation: dot-pulse 2.2s ease-in-out infinite; }
+  .eyebrow-dot, .pulse-dot { animation: dot-pulse 2s ease-in-out infinite; }
+  @keyframes motion-fade-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes motion-fade-down { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes dashboard-in { from { opacity: 0; transform: translateY(24px) rotate(2deg) scale(.97); } to { opacity: 1; transform: translateY(0) rotate(0) scale(1); } }
+  @keyframes pipeline-pop { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes float-note-one { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-8px) rotate(1deg); } }
+  @keyframes float-note-two { 0%, 100% { transform: translateY(0) rotate(1deg); } 50% { transform: translateY(8px) rotate(-1deg); } }
+  @keyframes panel-glow { from { box-shadow: 0 26px 60px rgba(18,97,214,.2); } to { box-shadow: 0 32px 74px rgba(18,97,214,.32); } }
+  @keyframes score-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.035); } }
+  @keyframes dot-pulse { 0%, 100% { opacity: .7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.16); } }
+}

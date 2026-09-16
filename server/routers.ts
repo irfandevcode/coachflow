@@ -2,6 +2,8 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
+import { createAuditSubmission } from "./db";
+import { z } from "zod";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -16,13 +18,36 @@ export const appRouter = router({
       } as const;
     }),
   }),
-
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  audit: router({
+    submit: publicProcedure.input(z.object({
+      name: z.string().min(1).max(160),
+      email: z.string().email().max(320),
+      website: z.string().max(500),
+      niche: z.string().max(180),
+      offer: z.string().max(1000),
+      price: z.string().max(100),
+      monthlyLeads: z.string().max(100),
+      bookedCalls: z.string().max(100),
+      leadSource: z.string().max(100),
+      challenge: z.string().max(100),
+      overallScore: z.number().int().min(0).max(100),
+      categoryScores: z.array(z.object({ label: z.string(), score: z.number().int().min(0).max(100) })),
+    })).mutation(async ({ input }) => {
+      const persisted = await createAuditSubmission({
+        ...input,
+        website: input.website || null,
+        niche: input.niche || null,
+        offer: input.offer || null,
+        price: input.price || null,
+        monthlyLeads: input.monthlyLeads || null,
+        bookedCalls: input.bookedCalls || null,
+        leadSource: input.leadSource || null,
+        challenge: input.challenge || null,
+        categoryScores: JSON.stringify(input.categoryScores),
+      });
+      return { success: true, persisted } as const;
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

@@ -25,4 +25,22 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+export const auditSubmissions = mysqlTable("audit_submissions", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 160 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  website: varchar("website", { length: 500 }),
+  niche: varchar("niche", { length: 180 }),
+  offer: text("offer"),
+  price: varchar("price", { length: 100 }),
+  monthlyLeads: varchar("monthlyLeads", { length: 100 }),
+  bookedCalls: varchar("bookedCalls", { length: 100 }),
+  leadSource: varchar("leadSource", { length: 100 }),
+  challenge: varchar("challenge", { length: 100 }),
+  overallScore: int("overallScore").notNull(),
+  categoryScores: text("categoryScores").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AuditSubmission = typeof auditSubmissions.$inferSelect;
+export type InsertAuditSubmission = typeof auditSubmissions.$inferInsert;

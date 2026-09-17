@@ -11,7 +11,10 @@ describe("askCoachFlowGemini", () => {
     }), { status: 200, headers: { "Content-Type": "application/json" } }));
     vi.stubGlobal("fetch", fetchMock);
 
-    const result = await askCoachFlowGemini([{ role: "user", content: "Where should I look first?" }]);
+    const result = await askCoachFlowGemini([{ role: "user", content: "Where should I look first?" }], {
+      stage: 1,
+      answers: { goal: "I help health coaches get more qualified consultations." },
+    });
 
     expect(result).toBe("Start by mapping your lead-to-call handoff.");
     expect(fetchMock).toHaveBeenCalledOnce();
@@ -20,6 +23,8 @@ describe("askCoachFlowGemini", () => {
     expect(url).toContain("key=test-server-secret");
     const body = JSON.parse(String(options.body));
     expect(body.systemInstruction.parts[0].text).toContain("CoachFlow AI concierge");
+    expect(body.systemInstruction.parts[0].text).toContain("stage 1/4");
+    expect(body.systemInstruction.parts[0].text).toContain("health coaches");
     expect(body.contents).toEqual([{ role: "user", parts: [{ text: "Where should I look first?" }] }]);
   });
 });

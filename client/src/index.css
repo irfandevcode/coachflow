@@ -213,3 +213,23 @@
   @keyframes footer-link-in { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
   @keyframes social-pop { from { opacity: 0; transform: translateY(8px) scale(.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
 }
+
+
+@layer components {
+  .coach-chat-progress { border-bottom: 1px solid #e8f0f8; background: #fbfdff; padding: .75rem 1rem .7rem; color: #6d849e; font-size: .65rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+  .coach-chat-progress strong { color: #1261d6; font-size: .68rem; }
+  .coach-chat-progress-track { height: .28rem; margin-top: .55rem; overflow: hidden; border-radius: 999px; background: #dceafa; }
+  .coach-chat-progress-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #1261d6, #68a7ef); transition: width .3s cubic-bezier(.23,1,.32,1); }
+  .coach-chat-progress-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem; margin-top: .45rem; color: #9aafc5; font-size: .53rem; letter-spacing: 0; text-transform: none; }
+  .coach-chat-progress-steps span.is-complete { color: #1261d6; }
+  .coach-chat-booking { display: flex; align-items: center; gap: .65rem; border-top: 1px solid #e8f0f8; background: #f4f9ff; padding: .8rem .9rem; }
+  .coach-chat-booking-icon { display: flex; height: 2rem; width: 2rem; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: .65rem; background: #dcecff; color: #1261d6; }
+  .coach-chat-booking-link { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .25rem; border-radius: .55rem; background: #1261d6; padding: .55rem .65rem; color: #fff; font-size: .7rem; font-weight: 800; transition: transform .18s cubic-bezier(.23,1,.32,1), background-color .18s ease; }
+  .coach-chat-booking-link:hover { background: #0e50b4; transform: translateY(-2px); }
+  .coach-chat-booking-link:active { transform: scale(.97); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coach-chat-booking { animation: coach-booking-in .35s cubic-bezier(.23,1,.32,1) both; }
+  @keyframes coach-booking-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+}

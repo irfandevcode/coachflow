@@ -55,8 +55,17 @@ export const appRouter = router({
         role: z.enum(["user", "assistant"]),
         content: z.string().min(1).max(4_000),
       })).min(1).max(12),
+      qualification: z.object({
+        stage: z.number().int().min(0).max(4),
+        answers: z.object({
+          goal: z.string().max(800).optional(),
+          offer: z.string().max(800).optional(),
+          leadFlow: z.string().max(800).optional(),
+          timeline: z.string().max(800).optional(),
+        }),
+      }),
     })).mutation(async ({ input }) => ({
-      content: await askCoachFlowGemini(input.messages),
+      content: await askCoachFlowGemini(input.messages, input.qualification),
     })),
   }),
 });

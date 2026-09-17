@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { ArrowUpRight, Facebook, Instagram, Linkedin, Mail, Menu, Twitter, X } from "lucide-react";
 import { CoachFlowChat } from "@/components/CoachFlowChat";
 
 const navItems = [
@@ -71,28 +71,24 @@ export function SiteShell({ children }: { children: ReactNode }) {
       </header>
       <main>{children}</main>
       <CoachFlowChat />
-      <footer className="border-t border-[#dce8f6] bg-white">
-        <div className="container grid gap-12 py-14 md:grid-cols-[1.3fr_1fr_1fr_1fr] md:py-20">
+      <footer className="site-footer">
+        <div className="footer-cta-wrap"><div className="container"><div className="footer-cta"><div><Eyebrow dark>Ready when you are</Eyebrow><h2 className="mt-4 max-w-2xl text-3xl font-extrabold tracking-[-0.05em] text-white sm:text-4xl">Make the next step obvious for your best prospects.</h2></div><PrimaryButton href="/audit">Find your biggest opportunity</PrimaryButton></div></div></div>
+        <div className="container grid gap-12 py-14 md:grid-cols-[1.35fr_1fr_1fr_1fr] md:py-20">
           <div>
             <Logo />
-            <p className="mt-5 max-w-xs text-sm leading-7 text-[#627895]">Client acquisition systems for health & fitness coaches who want a clearer path from attention to qualified conversations.</p>
-            <p className="mt-8 text-xs font-semibold uppercase tracking-[0.18em] text-[#9aaec6]">Built for the next stage</p>
+            <p className="mt-5 max-w-xs text-sm leading-7 text-[#b2c7df]">Client acquisition systems for health & fitness coaches who want a clearer path from attention to qualified conversations.</p>
+            <div className="footer-socials" aria-label="CoachFlow social media links">
+              <a href="https://www.instagram.com/4irfan.ai?stkn=djN3M3RmM20zZHAy" target="_blank" rel="noreferrer" aria-label="CoachFlow on Instagram"><Instagram size={17} /></a>
+              <a href="https://www.facebook.com/share/1BUrwRe6CG/" target="_blank" rel="noreferrer" aria-label="CoachFlow on Facebook"><Facebook size={17} /></a>
+              <a href="https://www.linkedin.com/in/bandi-irfan-47153b410?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noreferrer" aria-label="CoachFlow on LinkedIn"><Linkedin size={17} /></a>
+              <a href="https://x.com/MuhammedIrfan_0" target="_blank" rel="noreferrer" aria-label="CoachFlow on X"><Twitter size={17} /></a>
+            </div>
           </div>
-          <div>
-            <p className="footer-heading">Explore</p>
-            <div className="footer-links"><Link href="/how-it-works">How it works</Link><Link href="/system">The system</Link><Link href="/about">About CoachFlow</Link><Link href="/insights">Insights</Link></div>
-          </div>
-          <div>
-            <p className="footer-heading">Take action</p>
-            <div className="footer-links"><Link href="/audit">Free acquisition audit</Link><Link href="/book">Book a strategy call</Link><Link href="/contact">Contact the team</Link></div>
-          </div>
-          <div>
-            <p className="footer-heading">Fine print</p>
-            <div className="footer-links"><Link href="/privacy">Privacy policy</Link><Link href="/terms">Terms of service</Link></div>
-            <p className="mt-6 text-sm text-[#91a5bd]">© 2026 CoachFlow</p>
-          </div>
+          <div><p className="footer-heading">Explore</p><div className="footer-links"><Link href="/how-it-works">How it works</Link><Link href="/system">The system</Link><Link href="/about">About CoachFlow</Link><Link href="/insights">Insights</Link></div></div>
+          <div><p className="footer-heading">Take action</p><div className="footer-links"><Link href="/audit">Free acquisition audit</Link><Link href="/book">Book a strategy call</Link><Link href="/contact">Contact the team</Link></div></div>
+          <div><p className="footer-heading">Stay connected</p><div className="footer-links"><a href="mailto:hello@coachflow.co"><Mail size={15} /> hello@coachflow.co</a><Link href="/privacy">Privacy policy</Link><Link href="/terms">Terms of service</Link></div></div>
         </div>
-        <div className="border-t border-[#edf3fa] py-4"><div className="container flex flex-col gap-2 text-xs text-[#91a5bd] sm:flex-row sm:items-center sm:justify-between"><span>Thoughtful systems. Better conversations.</span><span>For coaches building with intention.</span></div></div>
+        <div className="footer-bottom"><div className="container flex flex-col gap-2 text-xs text-[#91acce] sm:flex-row sm:items-center sm:justify-between"><span>© 2026 CoachFlow. Thoughtful systems. Better conversations.</span><span>For coaches building with intention.</span></div></div>
       </footer>
     </div>
   );

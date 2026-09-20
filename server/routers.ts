@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 import { askCoachFlowGemini } from "./gemini";
-import { calendarConfig, providerStatus } from "./integrations";
+import { calendarConfig, providerStatus, whatsappConfig } from "./integrations";
 import { createAppointment, createAuditRecord, createAuditSubmission, createAutomation, createForm, createTask, getCrmOverview, getTimeline, saveFormSubmission, updateLeadStage, upsertContactAndLead } from "./db";
 import { z } from "zod";
 
@@ -42,7 +42,7 @@ export const appRouter = router({
     }),
   }),
   booking: router({
-    config: publicProcedure.query(() => calendarConfig()),
+    config: publicProcedure.query(() => ({ ...calendarConfig(), whatsapp: whatsappConfig() })),
     request: publicProcedure.input(z.object({ contact: leadInputSchema, startAt: z.string().datetime().optional(), timezone: z.string().max(80).optional(), eventType: z.string().max(160).optional() })).mutation(async ({ input }) => createAppointment({ contact: input.contact, startAt: input.startAt ? new Date(input.startAt) : undefined, timezone: input.timezone, eventType: input.eventType })),
   }),
   forms: router({

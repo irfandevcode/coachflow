@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { ArrowUpRight, Facebook, Instagram, Linkedin, Mail, Menu, Twitter, X } from "lucide-react";
+import { ArrowUpRight, Facebook, Instagram, Linkedin, Mail, Menu, MessageCircle, Twitter, X } from "lucide-react";
 import { CoachFlowChat } from "@/components/CoachFlowChat";
 
 const navItems = [
@@ -86,7 +86,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
           </div>
           <div><p className="footer-heading">Explore</p><div className="footer-links"><Link href="/how-it-works">How it works</Link><Link href="/system">The system</Link><Link href="/about">About CoachFlow</Link><Link href="/insights">Insights</Link></div></div>
           <div><p className="footer-heading">Take action</p><div className="footer-links"><Link href="/audit">Free acquisition audit</Link><Link href="/book">Book a strategy call</Link><Link href="/contact">Contact the team</Link></div></div>
-          <div><p className="footer-heading">Stay connected</p><div className="footer-links"><a href="mailto:hello@coachflow.co"><Mail size={15} /> hello@coachflow.co</a><Link href="/privacy">Privacy policy</Link><Link href="/terms">Terms of service</Link></div></div>
+          <div><p className="footer-heading">Stay connected</p><div className="footer-links"><a href="mailto:hello@coachflow.co"><Mail size={15} /> hello@coachflow.co</a><a href="https://wa.me/917569819144?text=Hi%20CoachFlow%2C%20I%E2%80%99d%20like%20help%20reviewing%20my%20client%20acquisition%20system." target="_blank" rel="noreferrer"><MessageCircle size={15} /> WhatsApp: +91 75698 19144</a><Link href="/privacy">Privacy policy</Link><Link href="/terms">Terms of service</Link></div></div>
         </div>
         <div className="footer-bottom"><div className="container flex flex-col gap-2 text-xs text-[#91acce] sm:flex-row sm:items-center sm:justify-between"><span>© 2026 CoachFlow. Thoughtful systems. Better conversations.</span><span>For coaches building with intention.</span></div></div>
       </footer>

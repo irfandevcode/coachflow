@@ -1,5 +1,18 @@
 export type MessagingChannel = "email" | "sms" | "whatsapp";
 
+export const COACHFLOW_WHATSAPP_NUMBER = "917569819144";
+export const COACHFLOW_WHATSAPP_DISPLAY = "+91 75698 19144";
+
+export function whatsappConfig() {
+  const message = "Hi CoachFlow, I’d like help reviewing my client acquisition system.";
+  return {
+    number: COACHFLOW_WHATSAPP_DISPLAY,
+    chatUrl: `https://wa.me/${COACHFLOW_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
+    directChatConfigured: true,
+    apiMessagingConfigured: Boolean(process.env.WHATSAPP_ACCESS_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID),
+  };
+}
+
 export function calendarConfig() {
   return {
     provider: process.env.CALENDAR_PROVIDER || "calendly",
@@ -13,7 +26,7 @@ export function providerStatus() {
     calendar: { provider: process.env.CALENDAR_PROVIDER || "calendly", configured: Boolean(process.env.CALENDLY_API_KEY || process.env.CALENDLY_BOOKING_URL) },
     email: { provider: process.env.EMAIL_PROVIDER || "not_connected", configured: Boolean(process.env.EMAIL_API_KEY) },
     sms: { provider: process.env.SMS_PROVIDER || "twilio", configured: Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) },
-    whatsapp: { provider: process.env.WHATSAPP_PROVIDER || "not_connected", configured: Boolean(process.env.WHATSAPP_ACCESS_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID) },
+    whatsapp: { provider: process.env.WHATSAPP_PROVIDER || "click_to_chat", configured: Boolean(process.env.WHATSAPP_ACCESS_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID), directChatConfigured: true, contactNumber: COACHFLOW_WHATSAPP_DISPLAY },
   };
 }
 

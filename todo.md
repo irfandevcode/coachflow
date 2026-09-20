@@ -2,6 +2,8 @@
 
 ## Completed
 
+- [x] Added WhatsApp click-to-chat for **+91 75698 19144**, including booking-page CTA, prefilled message, footer contact link, CRM booking capture, and public provider configuration.
+
 - [x] Added CRM data model for contacts, leads, audit records, conversations, appointments, tasks, forms, form submissions, automations, timeline events, and consent records.
 - [x] Connected the six-step client acquisition audit to contact creation, deterministic scoring, audit records, attribution, and pipeline entry.
 - [x] Added score bands: Low Intent, Warm, Qualified, and High Intent.
@@ -19,6 +21,7 @@
 - `pnpm test` passes: 6 test files, 9 tests.
 - `pnpm build` passes.
 - Desktop and mobile screenshots reviewed for `/audit`, `/book`, and `/crm`.
+- WhatsApp link and number verified in source and in the booking-page screenshot; API-based WhatsApp sending remains disabled until Business API credentials are configured.
 
 ## Provider configuration notes
 

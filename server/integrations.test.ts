@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { consentAllows, queueMessage } from "./integrations";
+import { consentAllows, queueMessage, whatsappConfig } from "./integrations";
 
 describe("consent-aware messaging", () => {
   it("blocks outbound messaging without marketing consent", () => {
@@ -12,5 +12,12 @@ describe("consent-aware messaging", () => {
     const contact = { emailConsent: 1, smsConsent: 1, whatsappConsent: 0, marketingConsent: 1 };
     expect(consentAllows("sms", contact)).toBe(true);
     expect(queueMessage("sms", "appointment reminder", true)).toMatchObject({ queued: true, channel: "sms" });
+  });
+
+  it("builds a click-to-chat link for CoachFlow WhatsApp", () => {
+    const config = whatsappConfig();
+    expect(config.number).toBe("+91 75698 19144");
+    expect(config.chatUrl).toContain("https://wa.me/917569819144");
+    expect(config.directChatConfigured).toBe(true);
   });
 });

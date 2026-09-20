@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, Bot, CalendarDays, MessageCircle, Sparkles, X } from "lucide-react";
+import { ArrowRight, Bot, CalendarDays, FileSearch, MessageCircle, Sparkles, X } from "lucide-react";
 import { Link } from "wouter";
 import { AIChatBox, type Message } from "@/components/AIChatBox";
 import { trpc } from "@/lib/trpc";
@@ -55,6 +55,7 @@ export function CoachFlowChat() {
     {open && <div className="coach-chat-panel" role="dialog" aria-label="CoachFlow AI assistant">
       <div className="coach-chat-header"><div className="flex items-center gap-3"><div className="coach-chat-avatar"><Bot size={18} /></div><div><p className="text-sm font-extrabold text-white">CoachFlow assistant</p><p className="mt-0.5 text-[11px] font-semibold text-[#b9d7ff]">A quick path to your next step</p></div></div><button type="button" className="coach-chat-close" onClick={() => setOpen(false)} aria-label="Close chat"><X size={18} /></button></div>
       <div className="coach-chat-progress" aria-label={`${qualification.stage} of 4 qualifying questions answered`}><div className="flex items-center justify-between"><span>Consultation fit check</span><strong>{qualification.stage}/4</strong></div><div className="coach-chat-progress-track"><span style={{ width: `${qualification.stage * 25}%` }} /></div><div className="coach-chat-progress-steps">{qualificationSteps.map((step, index) => <span key={step.key} className={index < qualification.stage ? "is-complete" : ""}>{step.label}</span>)}</div></div>
+      {qualification.stage === 0 && <Link href="/audit" className="coach-chat-audit-cta"><span className="coach-chat-booking-icon"><FileSearch size={16} /></span><span><strong>Want a deeper analysis?</strong><small>Start the free client acquisition audit</small></span><ArrowRight size={15} /></Link>}
       <AIChatBox
         messages={messages}
         onSendMessage={sendMessage}

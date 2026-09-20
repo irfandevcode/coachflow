@@ -21,15 +21,22 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { Activity, CalendarClock, ClipboardList, FileText, KanbanSquare, LayoutDashboard, LogOut, PanelLeft, Settings2, Users, Workflow } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/crm" },
+  { icon: Users, label: "Leads", path: "/crm?section=leads" },
+  { icon: KanbanSquare, label: "Pipeline", path: "/crm?section=pipeline" },
+  { icon: CalendarClock, label: "Appointments", path: "/crm?section=appointments" },
+  { icon: ClipboardList, label: "Tasks", path: "/crm?section=tasks" },
+  { icon: FileText, label: "Forms", path: "/crm?section=forms" },
+  { icon: Workflow, label: "Automations", path: "/crm?section=automations" },
+  { icon: Activity, label: "Analytics", path: "/crm?section=analytics" },
+  { icon: Settings2, label: "Back to site", path: "/" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";

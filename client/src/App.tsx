@@ -7,6 +7,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Audit from "./pages/Audit";
 import { AboutPage, BookPage, ContactPage, HowItWorks, InsightsPage, PrivacyPage, SystemPage, TermsPage } from "./pages/Pages";
+import CRM from "./pages/CRM";
+import BookingPage from "./pages/BookingPage";
 
 function Router() {
   return <Switch>
@@ -17,9 +19,10 @@ function Router() {
     <Route path="/about" component={AboutPage} />
     <Route path="/insights" component={InsightsPage} />
     <Route path="/contact" component={ContactPage} />
-    <Route path="/book" component={BookPage} />
+    <Route path="/book" component={BookingPage} />
     <Route path="/privacy" component={PrivacyPage} />
     <Route path="/terms" component={TermsPage} />
+    <Route path="/crm" component={CRM} />
     <Route path="/404" component={NotFound} />
     <Route component={NotFound} />
   </Switch>;

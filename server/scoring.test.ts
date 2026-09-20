@@ -9,6 +9,7 @@ describe("scoreLead", () => {
   });
 
   it("does not inflate a blank lead", () => {
-    expect(scoreLead({})).toEqual({ score: 0, label: "Low Intent" });
+    expect(scoreLead({})).toMatchObject({ score: 0, label: "Low Intent" });
+    expect(scoreLead({}).factors.every((factor) => factor.present === false)).toBe(true);
   });
 });

@@ -23,6 +23,8 @@ function Router() {
     <Route path="/privacy" component={PrivacyPage} />
     <Route path="/terms" component={TermsPage} />
     <Route path="/crm" component={CRM} />
+    <Route path="/admin/crm" component={CRM} />
+    <Route path="/admin/forms" component={CRM} />
     <Route path="/404" component={NotFound} />
     <Route component={NotFound} />
   </Switch>;

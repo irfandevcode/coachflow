@@ -4,7 +4,28 @@ import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 import { askCoachFlowGemini } from "./gemini";
 import { calendarConfig, providerStatus, whatsappConfig } from "./integrations";
-import { createAppointment, createAuditRecord, createAuditSubmission, createAutomation, createForm, createTask, getCrmOverview, getTimeline, saveFormSubmission, updateLeadStage, upsertContactAndLead } from "./db";
+import {
+  createAppointment,
+  createAuditRecord,
+  createAuditSubmission,
+  createAutomation,
+  createForm,
+  createTask,
+  exportCrmCsv,
+  exportFormSubmissionsCsv,
+  getAnalyticsSummary,
+  getCrmLeadDirectory,
+  getCrmOverview,
+  getLeadProfile,
+  getTimeline,
+  queueLeadAutomation,
+  saveConversationMessages,
+  saveFormSubmission,
+  trackAnalyticsEvent,
+  updateLeadStage,
+  upsertContactAndLead,
+} from "./db";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 const attributionSchema = z.object({
@@ -12,8 +33,10 @@ const attributionSchema = z.object({
 }).optional();
 
 const leadInputSchema = z.object({
-  firstName: z.string().min(1).max(100), lastName: z.string().max(100).optional(), email: z.string().email().max(320), phone: z.string().max(50).optional(), whatsappNumber: z.string().max(50).optional(), niche: z.string().max(180).optional(), country: z.string().max(120).optional(), website: z.string().max(500).optional(), instagram: z.string().max(180).optional(), offer: z.string().max(2000).optional(), offerPrice: z.string().max(100).optional(), monthlyLeads: z.string().max(100).optional(), monthlyInquiries: z.string().max(100).optional(), monthlyBookedCalls: z.string().max(100).optional(), currentLeadSource: z.string().max(160).optional(), currentSystem: z.string().max(160).optional(), mainChallenge: z.string().max(180).optional(), source: z.string().max(100).optional(), emailConsent: z.boolean().optional(), smsConsent: z.boolean().optional(), whatsappConsent: z.boolean().optional(), marketingConsent: z.boolean().optional(), consentSource: z.string().max(180).optional(), consentText: z.string().max(1000).optional(), strategyCallInterest: z.boolean().optional(), urgency: z.string().max(80).optional(),
+  firstName: z.string().min(1).max(100), lastName: z.string().max(100).optional(), email: z.string().email().max(320), phone: z.string().max(50).optional(), whatsappNumber: z.string().max(50).optional(), niche: z.string().max(180).optional(), country: z.string().max(120).optional(), website: z.string().max(500).optional(), instagram: z.string().max(180).optional(), offer: z.string().max(2000).optional(), offerPrice: z.string().max(100).optional(), monthlyLeads: z.string().max(100).optional(), monthlyInquiries: z.string().max(100).optional(), monthlyBookedCalls: z.string().max(100).optional(), currentLeadSource: z.string().max(160).optional(), currentSystem: z.string().max(160).optional(), currentFunnel: z.string().max(160).optional(), currentBookingSystem: z.string().max(160).optional(), currentFollowUpSystem: z.string().max(160).optional(), mainChallenge: z.string().max(180).optional(), source: z.string().max(100).optional(), sourceDetail: z.string().max(180).optional(), emailConsent: z.boolean().optional(), smsConsent: z.boolean().optional(), whatsappConsent: z.boolean().optional(), marketingConsent: z.boolean().optional(), consentSource: z.string().max(180).optional(), consentText: z.string().max(1000).optional(), strategyCallInterest: z.boolean().optional(), urgency: z.string().max(80).optional(),
 });
+
+const genericFailure = () => { throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Something went wrong while submitting your information. Please try again." }); };
 
 export const appRouter = router({
   system: systemRouter,
@@ -23,27 +46,40 @@ export const appRouter = router({
   }),
   lead: router({
     create: publicProcedure.input(z.object({ contact: leadInputSchema, attribution: attributionSchema })).mutation(async ({ input }) => {
-      const result = await upsertContactAndLead(input.contact, { strategyCallInterest: input.contact.strategyCallInterest, urgency: input.contact.urgency });
-      await saveFormSubmission({ data: input.contact, attribution: input.attribution });
-      return result;
+      try {
+        const result = await upsertContactAndLead(input.contact, { strategyCallInterest: input.contact.strategyCallInterest, urgency: input.contact.urgency });
+        const submission = await saveFormSubmission({ contactId: result.contactId, data: input.contact, attribution: input.attribution });
+        await queueLeadAutomation({ contactId: result.contactId, leadId: result.leadId, source: input.contact.source, consent: { email: input.contact.emailConsent, sms: input.contact.smsConsent, whatsapp: input.contact.whatsappConsent } });
+        return { ...result, submissionId: submission.id };
+      } catch (error) {
+        console.error("[Lead] Submission failed", error);
+        return genericFailure();
+      }
     }),
   }),
   audit: router({
     submit: publicProcedure.input(z.object({
-      name: z.string().min(1).max(160), email: z.string().email().max(320), phone: z.string().max(50).optional(), website: z.string().max(500), instagram: z.string().max(180).optional(), niche: z.string().max(180), offer: z.string().max(1000), price: z.string().max(100), monthlyLeads: z.string().max(100), monthlyInquiries: z.string().max(100).optional(), bookedCalls: z.string().max(100), leadSource: z.string().max(100), currentSystem: z.string().max(160).optional(), challenge: z.string().max(100), overallScore: z.number().int().min(0).max(100), categoryScores: z.array(z.object({ label: z.string(), score: z.number().int().min(0).max(100) })), attribution: attributionSchema, marketingConsent: z.boolean().optional(), smsConsent: z.boolean().optional(), whatsappConsent: z.boolean().optional(),
+      name: z.string().min(1).max(160), email: z.string().email().max(320), phone: z.string().max(50).optional(), whatsappNumber: z.string().max(50).optional(), country: z.string().max(120).optional(), website: z.string().max(500), instagram: z.string().max(180).optional(), niche: z.string().max(180), offer: z.string().max(1000), price: z.string().max(100), monthlyLeads: z.string().max(100), monthlyInquiries: z.string().max(100).optional(), bookedCalls: z.string().max(100), leadSource: z.string().max(100), currentFunnel: z.string().max(160).optional(), currentBookingSystem: z.string().max(160).optional(), currentFollowUpSystem: z.string().max(160).optional(), currentSystem: z.string().max(160).optional(), challenge: z.string().max(100), overallScore: z.number().int().min(0).max(100), categoryScores: z.array(z.object({ label: z.string(), score: z.number().int().min(0).max(100) })), attribution: attributionSchema, marketingConsent: z.boolean().optional(), smsConsent: z.boolean().optional(), whatsappConsent: z.boolean().optional(), consentText: z.string().max(1000).optional(),
     })).mutation(async ({ input }) => {
-      const firstAndLast = input.name.trim().split(/\s+/);
-      const contact = await upsertContactAndLead({ firstName: firstAndLast[0] || input.name, lastName: firstAndLast.slice(1).join(" ") || undefined, email: input.email, phone: input.phone, website: input.website, instagram: input.instagram, niche: input.niche, offer: input.offer, offerPrice: input.price, monthlyLeads: input.monthlyLeads, monthlyInquiries: input.monthlyInquiries, monthlyBookedCalls: input.bookedCalls, currentLeadSource: input.leadSource, currentSystem: input.currentSystem, mainChallenge: input.challenge, source: input.attribution?.utm_source || "free_audit", marketingConsent: input.marketingConsent, smsConsent: input.smsConsent, whatsappConsent: input.whatsappConsent, emailConsent: input.marketingConsent, consentSource: "free_audit", consentText: "I agree to receive the requested audit and relevant follow-up.", }, { offer: input.offer, offerPrice: input.price, monthlyLeads: input.monthlyLeads, monthlyInquiries: input.monthlyInquiries, monthlyBookedCalls: input.bookedCalls, currentSystem: input.currentSystem, currentLeadSource: input.leadSource, mainChallenge: input.challenge, strategyCallInterest: true });
-      await createAuditSubmission({ name: input.name, email: input.email, website: input.website || null, niche: input.niche || null, offer: input.offer || null, price: input.price || null, monthlyLeads: input.monthlyLeads || null, bookedCalls: input.bookedCalls || null, leadSource: input.leadSource || null, challenge: input.challenge || null, overallScore: input.overallScore, categoryScores: JSON.stringify(input.categoryScores) });
-      const lowest = [...input.categoryScores].sort((a, b) => a.score - b.score)[0];
-      await createAuditRecord({ contactId: contact.contactId, overallScore: input.overallScore, categoryScores: JSON.stringify(input.categoryScores), biggestOpportunity: lowest ? lowest.label : "Follow-up", recommendations: ["Clarify one next step from attention to conversation.", "Add a short follow-up path for people who are not ready today.", "Connect qualification and booking so the call feels like a natural next step."] });
-      await saveFormSubmission({ data: input, attribution: input.attribution });
-      return { success: true, ...contact } as const;
+      try {
+        const firstAndLast = input.name.trim().split(/\s+/);
+        const contact = await upsertContactAndLead({ firstName: firstAndLast[0] || input.name, lastName: firstAndLast.slice(1).join(" ") || undefined, email: input.email, phone: input.phone, whatsappNumber: input.whatsappNumber, country: input.country, website: input.website, instagram: input.instagram, niche: input.niche, offer: input.offer, offerPrice: input.price, monthlyLeads: input.monthlyLeads, monthlyInquiries: input.monthlyInquiries, monthlyBookedCalls: input.bookedCalls, currentLeadSource: input.leadSource, currentSystem: input.currentSystem, currentFunnel: input.currentFunnel, currentBookingSystem: input.currentBookingSystem, currentFollowUpSystem: input.currentFollowUpSystem, mainChallenge: input.challenge, source: input.attribution?.utm_source || "free_audit", marketingConsent: input.marketingConsent, emailConsent: input.marketingConsent, smsConsent: input.smsConsent, whatsappConsent: input.whatsappConsent, consentSource: "free_audit", consentText: input.consentText || "I agree to receive the requested audit and relevant follow-up." }, { offer: input.offer, offerPrice: input.price, monthlyLeads: input.monthlyLeads, monthlyInquiries: input.monthlyInquiries, monthlyBookedCalls: input.bookedCalls, currentSystem: input.currentSystem, currentLeadSource: input.leadSource, mainChallenge: input.challenge, strategyCallInterest: true });
+        const submission = await saveFormSubmission({ contactId: contact.contactId, data: input, attribution: input.attribution });
+        await createAuditSubmission({ name: input.name, email: input.email, website: input.website || null, niche: input.niche || null, offer: input.offer || null, price: input.price || null, monthlyLeads: input.monthlyLeads || null, bookedCalls: input.bookedCalls || null, leadSource: input.leadSource || null, challenge: input.challenge || null, overallScore: input.overallScore, categoryScores: JSON.stringify(input.categoryScores) });
+        const lowest = [...input.categoryScores].sort((a, b) => a.score - b.score)[0];
+        await createAuditRecord({ contactId: contact.contactId, overallScore: input.overallScore, categoryScores: JSON.stringify(input.categoryScores), biggestOpportunity: lowest ? lowest.label : "Follow-up", recommendations: ["Clarify one next step from attention to conversation.", "Add a short follow-up path for people who are not ready today.", "Connect qualification and booking so the call feels like a natural next step."], aiAnalysis: "Your audit highlights the clearest path to improve acquisition consistency by connecting capture, nurture, qualification, and booking." });
+        await queueLeadAutomation({ contactId: contact.contactId, leadId: contact.leadId, source: "free_audit", consent: { email: input.marketingConsent, sms: input.smsConsent, whatsapp: input.whatsappConsent } });
+        await trackAnalyticsEvent({ contactId: contact.contactId, leadId: contact.leadId, event: "AUDIT_COMPLETION", source: "free_audit", metadata: { overallScore: input.overallScore } });
+        return { success: true, submissionId: submission.id, ...contact } as const;
+      } catch (error) {
+        console.error("[Audit] Submission failed", error);
+        return genericFailure();
+      }
     }),
   }),
   booking: router({
     config: publicProcedure.query(() => ({ ...calendarConfig(), whatsapp: whatsappConfig() })),
-    request: publicProcedure.input(z.object({ contact: leadInputSchema, startAt: z.string().datetime().optional(), timezone: z.string().max(80).optional(), eventType: z.string().max(160).optional() })).mutation(async ({ input }) => createAppointment({ contact: input.contact, startAt: input.startAt ? new Date(input.startAt) : undefined, timezone: input.timezone, eventType: input.eventType })),
+    request: publicProcedure.input(z.object({ contact: leadInputSchema, startAt: z.string().datetime().optional(), endAt: z.string().datetime().optional(), timezone: z.string().max(80).optional(), eventType: z.string().max(160).optional(), meetingLink: z.string().url().optional(), externalEventId: z.string().max(200).optional(), status: z.enum(["requested", "booked", "cancelled", "rescheduled", "showed", "no_show"]).optional() })).mutation(async ({ input }) => createAppointment({ contact: input.contact, startAt: input.startAt ? new Date(input.startAt) : undefined, endAt: input.endAt ? new Date(input.endAt) : undefined, timezone: input.timezone, eventType: input.eventType, meetingLink: input.meetingLink, externalEventId: input.externalEventId, status: input.status })),
   }),
   forms: router({
     catalog: publicProcedure.query(() => [
@@ -53,10 +89,25 @@ export const appRouter = router({
       { slug: "contact", name: "Contact Form", fields: ["text", "email", "long text"] },
       { slug: "custom-lead-qualification", name: "Custom Lead Qualification Form", fields: ["text", "email", "number", "dropdown", "multiple choice", "checkbox", "long text", "url", "hidden"] },
     ]),
-    submit: publicProcedure.input(z.object({ formId: z.number().int().optional(), contact: leadInputSchema.optional(), data: z.record(z.string(), z.unknown()), attribution: z.record(z.string(), z.string()).optional() })).mutation(async ({ input }) => { const lead = input.contact ? await upsertContactAndLead(input.contact) : null; const result = await saveFormSubmission({ formId: input.formId, contactId: lead?.contactId, data: input.data, attribution: input.attribution }); return { ...result, contactId: lead?.contactId || null }; }),
+    submit: publicProcedure.input(z.object({ formId: z.number().int().optional(), contact: leadInputSchema.optional(), data: z.record(z.string(), z.unknown()), attribution: z.record(z.string(), z.string()).optional() })).mutation(async ({ input }) => {
+      try {
+        const lead = input.contact ? await upsertContactAndLead(input.contact) : null;
+        const result = await saveFormSubmission({ formId: input.formId, contactId: lead?.contactId, data: input.data, attribution: input.attribution });
+        if (lead) await queueLeadAutomation({ contactId: lead.contactId, leadId: lead.leadId, source: input.contact?.source });
+        return { ...result, contactId: lead?.contactId || null };
+      } catch (error) {
+        console.error("[Form] Submission failed", error);
+        return genericFailure();
+      }
+    }),
   }),
   crm: router({
     overview: adminProcedure.query(() => getCrmOverview()),
+    directory: adminProcedure.input(z.object({ search: z.string().max(160).optional(), stage: z.string().max(80).optional(), niche: z.string().max(180).optional(), source: z.string().max(180).optional(), minScore: z.number().int().min(0).max(100).optional(), maxScore: z.number().int().min(0).max(100).optional(), booked: z.boolean().optional(), page: z.number().int().min(1).optional(), pageSize: z.number().int().min(1).max(100).optional() }).optional()).query(({ input }) => getCrmLeadDirectory(input || {})),
+    profile: adminProcedure.input(z.object({ contactId: z.number().int() })).query(({ input }) => getLeadProfile(input.contactId)),
+    exportCsv: adminProcedure.query(() => exportCrmCsv()),
+    exportSubmissionsCsv: adminProcedure.query(() => exportFormSubmissionsCsv()),
+    analytics: adminProcedure.query(() => getAnalyticsSummary()),
     moveLead: adminProcedure.input(z.object({ leadId: z.number().int(), stage: z.enum(["new_lead", "engaged", "qualified", "audit_requested", "strategy_call_invited", "booked", "showed", "proposal", "won", "lost", "nurture"]) })).mutation(({ input }) => updateLeadStage(input.leadId, input.stage)),
     timeline: adminProcedure.input(z.object({ contactId: z.number().int() })).query(({ input }) => getTimeline(input.contactId)),
     createTask: adminProcedure.input(z.object({ contactId: z.number().int().optional(), title: z.string().min(1).max(200), description: z.string().max(2000).optional(), priority: z.enum(["low", "normal", "high"]).optional() })).mutation(({ input }) => createTask(input)),
@@ -65,7 +116,11 @@ export const appRouter = router({
     providerStatus: adminProcedure.query(() => providerStatus()),
   }),
   ai: router({
-    chat: publicProcedure.input(z.object({ messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().min(1).max(4_000) })).min(1).max(12), qualification: z.object({ stage: z.number().int().min(0).max(4), answers: z.object({ goal: z.string().max(800).optional(), offer: z.string().max(800).optional(), leadFlow: z.string().max(800).optional(), timeline: z.string().max(800).optional() }) }) })).mutation(async ({ input }) => ({ content: await askCoachFlowGemini(input.messages, input.qualification) })),
+    chat: publicProcedure.input(z.object({ messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().min(1).max(4_000) })).min(1).max(12), qualification: z.object({ stage: z.number().int().min(0).max(4), answers: z.object({ goal: z.string().max(800).optional(), offer: z.string().max(800).optional(), leadFlow: z.string().max(800).optional(), timeline: z.string().max(800).optional() }) }), contactId: z.number().int().optional(), conversationId: z.number().int().optional() })).mutation(async ({ input }) => {
+      const content = await askCoachFlowGemini(input.messages, input.qualification);
+      if (input.contactId) await saveConversationMessages({ contactId: input.contactId, conversationId: input.conversationId, messages: [...input.messages, { role: "assistant", content }] });
+      return { content };
+    }),
   }),
 });
 

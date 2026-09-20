@@ -1,13 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { createAuditSubmission, upsertContactAndLead, createAuditRecord, saveFormSubmission } = vi.hoisted(() => ({
+const { createAuditSubmission, upsertContactAndLead, createAuditRecord, saveFormSubmission, queueLeadAutomation, trackAnalyticsEvent } = vi.hoisted(() => ({
   createAuditSubmission: vi.fn(async () => true),
   upsertContactAndLead: vi.fn(async () => ({ contactId: 7, leadId: 9, score: 48, label: "Warm", persisted: true })),
   createAuditRecord: vi.fn(async () => true),
   saveFormSubmission: vi.fn(async () => ({ persisted: true })),
+  queueLeadAutomation: vi.fn(async () => true),
+  trackAnalyticsEvent: vi.fn(async () => true),
 }));
 
-vi.mock("./db", () => ({ createAuditSubmission, upsertContactAndLead, createAuditRecord, saveFormSubmission }));
+vi.mock("./db", () => ({ createAuditSubmission, upsertContactAndLead, createAuditRecord, saveFormSubmission, queueLeadAutomation, trackAnalyticsEvent }));
 
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
@@ -21,7 +23,7 @@ const validInput = {
 };
 
 describe("audit.submit", () => {
-  beforeEach(() => { createAuditSubmission.mockClear(); upsertContactAndLead.mockClear(); createAuditRecord.mockClear(); saveFormSubmission.mockClear(); });
+  beforeEach(() => { createAuditSubmission.mockClear(); upsertContactAndLead.mockClear(); createAuditRecord.mockClear(); saveFormSubmission.mockClear(); queueLeadAutomation.mockClear(); trackAnalyticsEvent.mockClear(); });
 
   it("accepts a valid diagnostic payload and persists it to the legacy and CRM records", async () => {
     const caller = appRouter.createCaller(ctx);

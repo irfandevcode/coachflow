@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
@@ -47,9 +47,13 @@ export const contacts = mysqlTable("contacts", {
   monthlyBookedCalls: varchar("monthlyBookedCalls", { length: 100 }),
   currentLeadSource: varchar("currentLeadSource", { length: 160 }),
   currentSystem: varchar("currentSystem", { length: 160 }),
+  currentFunnel: varchar("currentFunnel", { length: 160 }),
+  currentBookingSystem: varchar("currentBookingSystem", { length: 160 }),
+  currentFollowUpSystem: varchar("currentFollowUpSystem", { length: 160 }),
   mainChallenge: varchar("mainChallenge", { length: 180 }),
   leadScore: int("leadScore").default(0).notNull(),
   leadScoreLabel: varchar("leadScoreLabel", { length: 40 }).default("Low Intent").notNull(),
+  leadScoreFactors: text("leadScoreFactors"),
   source: varchar("source", { length: 100 }).default("website").notNull(),
   status: mysqlEnum("status", ["active", "inactive", "unsubscribed"]).default("active").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -64,6 +68,8 @@ export const contacts = mysqlTable("contacts", {
   consentTimestamp: timestamp("consentTimestamp"),
   consentSource: varchar("consentSource", { length: 180 }),
   consentText: text("consentText"),
+  optOutStatus: int("optOutStatus").default(0).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export const leads = mysqlTable("leads", {
@@ -72,7 +78,9 @@ export const leads = mysqlTable("leads", {
   stage: mysqlEnum("stage", ["new_lead", "engaged", "qualified", "audit_requested", "strategy_call_invited", "booked", "showed", "proposal", "won", "lost", "nurture"]).default("new_lead").notNull(),
   leadScore: int("leadScore").default(0).notNull(),
   leadScoreLabel: varchar("leadScoreLabel", { length: 40 }).default("Low Intent").notNull(),
+  leadScoreFactors: text("leadScoreFactors"),
   source: varchar("source", { length: 100 }).default("website").notNull(),
+  sourceDetail: varchar("sourceDetail", { length: 180 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -80,10 +88,18 @@ export const leads = mysqlTable("leads", {
 export const auditRecords = mysqlTable("audit_records", {
   id: int("id").autoincrement().primaryKey(),
   contactId: int("contactId").notNull(),
+  trafficScore: int("trafficScore").default(0).notNull(),
+  leadCaptureScore: int("leadCaptureScore").default(0).notNull(),
+  nurturingScore: int("nurturingScore").default(0).notNull(),
+  qualificationScore: int("qualificationScore").default(0).notNull(),
+  bookingScore: int("bookingScore").default(0).notNull(),
+  followUpScore: int("followUpScore").default(0).notNull(),
+  conversionScore: int("conversionScore").default(0).notNull(),
   overallScore: int("overallScore").notNull(),
   categoryScores: text("categoryScores").notNull(),
   biggestOpportunity: text("biggestOpportunity"),
   recommendations: text("recommendations"),
+  aiAnalysis: text("aiAnalysis"),
   completedAt: timestamp("completedAt").defaultNow().notNull(),
 });
 
@@ -94,6 +110,15 @@ export const conversations = mysqlTable("conversations", {
   messages: text("messages").notNull(),
   startedAt: timestamp("startedAt").defaultNow().notNull(),
   lastMessageAt: timestamp("lastMessageAt").defaultNow().notNull(),
+});
+
+export const conversationMessages = mysqlTable("conversation_messages", {
+  id: int("id").autoincrement().primaryKey(),
+  conversationId: int("conversationId").notNull(),
+  role: mysqlEnum("role", ["user", "assistant", "system"]).notNull(),
+  message: text("message").notNull(),
+  intent: varchar("intent", { length: 120 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
 export const appointments = mysqlTable("appointments", {
@@ -109,6 +134,38 @@ export const appointments = mysqlTable("appointments", {
   meetingLink: varchar("meetingLink", { length: 500 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({ calendarEventUnique: uniqueIndex("appointments_calendar_event_id_idx").on(table.calendarEventId) }));
+
+export const consents = mysqlTable("consents", {
+  id: int("id").autoincrement().primaryKey(),
+  contactId: int("contactId").notNull(),
+  channel: mysqlEnum("channel", ["email", "sms", "whatsapp", "marketing"]).notNull(),
+  granted: int("granted").default(0).notNull(),
+  source: varchar("source", { length: 180 }),
+  text: text("text"),
+  optedOut: int("optedOut").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const automationEvents = mysqlTable("automation_events", {
+  id: int("id").autoincrement().primaryKey(),
+  contactId: int("contactId"),
+  leadId: int("leadId"),
+  trigger: varchar("trigger", { length: 100 }).notNull(),
+  action: varchar("action", { length: 100 }).notNull(),
+  status: mysqlEnum("status", ["queued", "sent", "skipped", "failed"]).default("queued").notNull(),
+  detail: text("detail"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const analyticsEvents = mysqlTable("analytics_events", {
+  id: int("id").autoincrement().primaryKey(),
+  contactId: int("contactId"),
+  leadId: int("leadId"),
+  event: varchar("event", { length: 100 }).notNull(),
+  source: varchar("source", { length: 180 }),
+  metadata: text("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
 export const tasks = mysqlTable("tasks", {
@@ -182,3 +239,8 @@ export type Task = typeof tasks.$inferSelect;
 export type Form = typeof forms.$inferSelect;
 export type Automation = typeof automations.$inferSelect;
 export type TimelineEvent = typeof timelineEvents.$inferSelect;
+export type FormSubmission = typeof formSubmissions.$inferSelect;
+export type ConversationMessage = typeof conversationMessages.$inferSelect;
+export type Consent = typeof consents.$inferSelect;
+export type AutomationEvent = typeof automationEvents.$inferSelect;
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;

@@ -495,3 +495,27 @@
   .coach-chat-panel { max-height: calc(100dvh - 3.5rem); }
   .coach-chat-box { height: clamp(160px, calc(100dvh - 250px), 330px) !important; }
 }
+
+
+@layer components {
+  .crm-lead-toolbar { display: flex; align-items: flex-end; gap: .7rem; margin-bottom: 1rem; }
+  .crm-lead-toolbar label { display: grid; min-width: 0; gap: .35rem; color: #7890a9; font-size: .62rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+  .crm-lead-toolbar label:first-child { flex: 1; }
+  .crm-lead-toolbar input, .crm-lead-toolbar select { min-width: 0; border: 1px solid #dce9f7; border-radius: .65rem; background: #fbfdff; padding: .62rem .7rem; color: #365372; font-size: .74rem; font-weight: 600; outline: none; transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease; }
+  .crm-lead-toolbar input:focus, .crm-lead-toolbar select:focus { border-color: #73a9df; background: #fff; box-shadow: 0 0 0 3px rgba(18,97,214,.1); }
+  .crm-profile-history { display: grid; gap: .9rem; margin-top: 1.25rem; border-top: 1px solid #edf2f7; padding-top: 1.1rem; }
+  .crm-profile-history > div { border-radius: .85rem; background: #f8fbff; padding: .8rem; }
+  .crm-profile-history h3 { display: flex; align-items: center; justify-content: space-between; color: #365372; font-size: .75rem; font-weight: 900; }
+  .crm-profile-history h3 span { border-radius: 999px; background: #e4f0ff; padding: .15rem .42rem; color: #1261d6; font-size: .6rem; }
+  .crm-profile-history details { margin-top: .55rem; border: 1px solid #e0ebf6; border-radius: .55rem; background: #fff; padding: .5rem .6rem; }
+  .crm-profile-history summary { cursor: pointer; color: #55708d; font-size: .66rem; font-weight: 800; }
+  .crm-profile-history pre { max-height: 12rem; overflow: auto; margin-top: .5rem; white-space: pre-wrap; overflow-wrap: anywhere; color: #738ba4; font-family: inherit; font-size: .62rem; line-height: 1.5; }
+  .crm-history-card { display: grid; gap: .2rem; margin-top: .5rem; border: 1px solid #e0ebf6; border-radius: .55rem; background: #fff; padding: .55rem .6rem; }
+  .crm-history-card strong { color: #4c6885; font-size: .66rem; }
+  .crm-history-card small { color: #92a7bb; font-size: .6rem; }
+}
+
+@media (max-width: 640px) {
+  .crm-lead-toolbar { align-items: stretch; flex-direction: column; }
+  .crm-lead-toolbar label:first-child { flex: none; }
+}

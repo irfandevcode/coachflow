@@ -12,15 +12,19 @@
 - [x] Added chat-to-audit CTA and retained guided Flow AI consultation qualification.
 - [x] Added consent-aware email/SMS/WhatsApp abstractions and message templates; no outbound message sends without recorded consent.
 - [x] Added admin procedures for pipeline updates, tasks, forms, automations, provider status, and CRM overview.
+- [x] Added immutable form-submission history with attribution, duplicate-safe contact/lead upsert, automation events, consent history, analytics events, explicit audit category scores, and explainable score factors.
+- [x] Added admin CRM directory search/stage filter, CSV lead export, `/admin/crm`, `/admin/forms`, richer lead profiles, form submission history, audit history, appointment history, and Flow AI conversation history surfaces.
+- [x] Added external calendar event deduplication checks and stored lead timeline / analytics events for pipeline changes and bookings.
 - [x] Generated and applied the additive Drizzle migration `drizzle/0002_simple_crusher_hogan.sql`.
 - [x] Added unit coverage for audit CRM persistence, scoring, and consent-aware messaging.
 
 ## Verification
 
 - `pnpm check` passes.
-- `pnpm test` passes: 6 test files, 9 tests.
+- `pnpm test` passes: 6 test files, 10 tests.
 - `pnpm build` passes.
 - Desktop and mobile screenshots reviewed for `/audit`, `/book`, and `/crm`.
+- `/admin/crm` and `/admin/forms` routes verified; protected admin access remains enforced.
 - WhatsApp link and number verified in source and in the booking-page screenshot; API-based WhatsApp sending remains disabled until Business API credentials are configured.
 
 ## Provider configuration notes
@@ -33,3 +37,7 @@ Set server-side environment variables when ready:
 - `WHATSAPP_PROVIDER`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`
 
 Provider credentials are never exposed to the browser. Until configured, provider actions remain visible as ready-to-connect CRM blueprints and no outbound message is sent.
+
+## Architecture note
+
+The attached brief names PostgreSQL + Prisma, but this existing WebDev project is scaffolded and deployed with the managed `DATABASE_URL` MySQL/TiDB connection and Drizzle ORM. The CRM work was added additively on that existing production data layer so the Flow AI application and auth remain intact; switching databases/ORMs would require a separate infrastructure migration and connection approval.

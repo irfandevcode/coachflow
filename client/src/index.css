@@ -368,3 +368,71 @@
   .coach-chat-audit-cta strong { color: #365372; font-size: .68rem; }
   .coach-chat-audit-cta small { margin-top: .15rem; color: #91a6ba; font-size: .61rem; }
 }
+
+
+/* Complete interaction and motion pass: smooth, purposeful, and accessible. */
+@layer components {
+  .nav-link { position: relative; padding-block: .35rem; }
+  .nav-link::after { position: absolute; right: 0; bottom: 0; left: 0; height: 2px; border-radius: 999px; background: #1261d6; content: ""; transform: scaleX(0); transform-origin: right; transition: transform .22s cubic-bezier(.23,1,.32,1); }
+  .nav-link:hover::after, .nav-link.is-active::after { transform: scaleX(1); transform-origin: left; }
+  .button:focus-visible, .nav-link:focus-visible, .footer-links a:focus-visible, .footer-socials a:focus-visible { outline: 3px solid rgba(18,97,214,.28); outline-offset: 4px; }
+  .button svg { will-change: transform; }
+  .input-field, .choice-card, .contact-item, .booking-placeholder, .newsletter-panel, .system-map, .audit-form { will-change: transform; }
+  .input-field:focus { transform: translateY(-1px); }
+  .choice-card { transition: transform .2s cubic-bezier(.23,1,.32,1), border-color .16s ease, background-color .16s ease, box-shadow .16s ease; }
+  .choice-card:hover { transform: translateY(-2px); }
+  .contact-item { transition: transform .22s cubic-bezier(.23,1,.32,1), border-color .18s ease; }
+  .contact-item:hover { transform: translateX(5px); border-color: #b7d1ef; }
+  .booking-placeholder:hover, .newsletter-panel:hover, .system-map:hover, .audit-form:hover { box-shadow: 0 24px 55px rgba(26,88,146,.1); transition: box-shadow .25s ease, transform .25s cubic-bezier(.23,1,.32,1); transform: translateY(-2px); }
+  .footer-links a, .footer-socials a, .crm-inline-link, .crm-section-tabs button { will-change: transform, color; }
+  .crm-inline-link svg, .crm-primary-button svg, .crm-ghost-button svg { transition: transform .2s cubic-bezier(.23,1,.32,1); }
+  .crm-inline-link:hover svg, .crm-primary-button:hover svg, .crm-ghost-button:hover svg { transform: translateX(3px); }
+  .crm-section-tabs button { position: relative; }
+  .crm-section-tabs button::after { position: absolute; right: .7rem; bottom: -1px; left: .7rem; height: 2px; border-radius: 99px; background: #1261d6; content: ""; transform: scaleX(0); transition: transform .22s cubic-bezier(.23,1,.32,1); }
+  .crm-section-tabs button:hover::after, .crm-section-tabs button.is-active::after { transform: scaleX(1); }
+  .crm-table tbody tr, .crm-provider-item, .crm-task-row, .crm-automation-row, .crm-form-card, .crm-lead-card { transition: transform .2s cubic-bezier(.23,1,.32,1), background-color .18s ease, box-shadow .2s ease, border-color .18s ease; }
+  .crm-table tbody tr:hover { transform: translateX(3px); }
+  .crm-provider-item:hover, .crm-task-row:hover, .crm-automation-row:hover, .crm-form-card:hover { transform: translateY(-2px); border-color: #c2daf2; box-shadow: 0 10px 24px rgba(34,93,155,.08); }
+  .crm-lead-card:active { cursor: grabbing; transform: rotate(1deg) scale(.98); }
+  .crm-bar i, .crm-score-track i { transform-origin: left; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-section .eyebrow { animation: motion-fade-up .45s .02s both; }
+  .hero-section h1 { animation: motion-fade-up .65s .08s both; }
+  .hero-section p { animation: motion-fade-up .65s .15s both; }
+  .hero-section .button { animation: motion-fade-up .55s both; }
+  .hero-section .button:nth-child(2) { animation-delay: .08s; }
+  .hero-section .inline-flex { animation: motion-fade-up .55s .22s both; }
+  .hero-dashboard > * { animation: dashboard-child-in .5s both; }
+  .hero-dashboard > *:nth-child(2) { animation-delay: .12s; }
+  .hero-dashboard > *:nth-child(3) { animation-delay: .2s; }
+  .hero-dashboard > *:nth-child(4) { animation-delay: .28s; }
+  .hero-dashboard .rounded-2xl { transition: transform .2s cubic-bezier(.23,1,.32,1), box-shadow .2s ease; }
+  .hero-dashboard .rounded-2xl:hover { transform: translateX(4px); box-shadow: 0 12px 28px rgba(16,74,139,.1); }
+  .section-padding > .container > .display-heading, .section-padding > .container > .max-w-2xl { animation: motion-fade-up .6s .05s both; }
+  .cta-panel .button, .footer-cta .button { animation: button-ready .55s .28s both; }
+  .crm-title { animation: motion-fade-up .55s .04s both; }
+  .crm-subtitle { animation: motion-fade-up .55s .1s both; }
+  .crm-actions { animation: motion-fade-down .5s .12s both; }
+  .crm-section-tabs { animation: motion-fade-up .5s .16s both; }
+  .crm-stat-card:nth-child(1) { animation-delay: .05s; }.crm-stat-card:nth-child(2) { animation-delay: .09s; }.crm-stat-card:nth-child(3) { animation-delay: .13s; }.crm-stat-card:nth-child(4) { animation-delay: .17s; }.crm-stat-card:nth-child(5) { animation-delay: .21s; }.crm-stat-card:nth-child(6) { animation-delay: .25s; }
+  .crm-grid-two .crm-panel:nth-child(1) { animation-delay: .12s; }.crm-grid-two .crm-panel:nth-child(2) { animation-delay: .18s; }
+  .crm-provider-item:nth-child(1), .crm-contact-card:nth-child(1), .crm-kanban-column:nth-child(1) { animation-delay: .04s; }
+  .crm-provider-item:nth-child(2), .crm-contact-card:nth-child(2), .crm-kanban-column:nth-child(2) { animation-delay: .08s; }
+  .crm-provider-item:nth-child(3), .crm-contact-card:nth-child(3), .crm-kanban-column:nth-child(3) { animation-delay: .12s; }
+  .crm-provider-item:nth-child(4), .crm-contact-card:nth-child(4), .crm-kanban-column:nth-child(4) { animation-delay: .16s; }
+  .crm-provider-item, .crm-contact-card, .crm-kanban-column { animation: motion-fade-up .45s both; }
+  .crm-bar i, .crm-score-track i { animation: grow-bar .8s .28s cubic-bezier(.23,1,.32,1) both; }
+  .crm-provider-dot.is-ready { animation: ready-pulse 2.4s ease-in-out infinite; }
+  .coach-chat-trigger { animation: coach-chat-trigger-in .4s .25s cubic-bezier(.23,1,.32,1) both, chat-breathe 4s 1.2s ease-in-out infinite; }
+  @keyframes dashboard-child-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes button-ready { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes grow-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes ready-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(41,183,122,0); } 50% { box-shadow: 0 0 0 4px rgba(41,183,122,.14); } }
+  @keyframes chat-breathe { 0%, 100% { box-shadow: 0 14px 30px rgba(18,97,214,.28); } 50% { box-shadow: 0 18px 38px rgba(18,97,214,.4); } }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

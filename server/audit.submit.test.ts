@@ -40,4 +40,15 @@ describe("audit.submit", () => {
     await expect(caller.audit.submit({ ...validInput, email: "not-an-email" })).rejects.toMatchObject({ code: "BAD_REQUEST" });
     expect(createAuditSubmission).not.toHaveBeenCalled();
   });
+
+  it("reuses the same lead identity while recording a new submission on repeat email", async () => {
+    const caller = appRouter.createCaller(ctx);
+    const first = await caller.audit.submit(validInput);
+    const second = await caller.audit.submit({ ...validInput, offer: "Updated coaching offer" });
+
+    expect(first).toMatchObject({ contactId: 7, leadId: 9 });
+    expect(second).toMatchObject({ contactId: 7, leadId: 9 });
+    expect(upsertContactAndLead).toHaveBeenCalledTimes(2);
+    expect(saveFormSubmission).toHaveBeenCalledTimes(2);
+  });
 });

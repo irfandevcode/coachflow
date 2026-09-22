@@ -26,6 +26,8 @@
 - Desktop and mobile screenshots reviewed for `/audit`, `/book`, and `/crm`.
 - `/admin/crm` and `/admin/forms` routes verified; protected admin access remains enforced.
 - WhatsApp link and number verified in source and in the booking-page screenshot; API-based WhatsApp sending remains disabled until Business API credentials are configured.
+- Live verification completed with `crm-verification-20260921@example.com`: one Free Funnel Audit submission, one lead/contact identity, one audit result, three timeline events, and one follow-up task were returned from the persistent CRM data layer with all submitted answers intact.
+- Repaired live schema drift by adding the missing nullable `leads.sourceDetail` column; audit submission and CRM directory now complete successfully.
 
 ## Provider configuration notes
 

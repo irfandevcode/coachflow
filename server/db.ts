@@ -208,15 +208,15 @@ export async function createAuditRecord(input: { contactId: number; overallScore
   return true;
 }
 
-export async function createFormSubmission(input: { formId?: number; contactId?: number; leadId?: number; data: Record<string, unknown>; attribution?: Record<string, string> }) {
+export async function createFormSubmission(input: { formId?: number; formName?: string; contactId?: number; leadId?: number; data: Record<string, unknown>; attribution?: Record<string, string> }) {
   const db = await getDb();
   if (!db) return { id: 0, persisted: false };
-  const result = await db.insert(formSubmissions).values({ formId: input.formId || null, contactId: input.contactId || null, data: JSON.stringify(input.data), utmSource: input.attribution?.utm_source || null, utmMedium: input.attribution?.utm_medium || null, utmCampaign: input.attribution?.utm_campaign || null, utmContent: input.attribution?.utm_content || null, utmTerm: input.attribution?.utm_term || null, landingPage: input.attribution?.landing_page || null, referrer: input.attribution?.referrer || null, firstTouchSource: input.attribution?.first_touch_source || null, lastTouchSource: input.attribution?.last_touch_source || null });
+  const result = await db.insert(formSubmissions).values({ formId: input.formId || null, formName: input.formName || null, contactId: input.contactId || null, data: JSON.stringify(input.data), utmSource: input.attribution?.utm_source || null, utmMedium: input.attribution?.utm_medium || null, utmCampaign: input.attribution?.utm_campaign || null, utmContent: input.attribution?.utm_content || null, utmTerm: input.attribution?.utm_term || null, landingPage: input.attribution?.landing_page || null, referrer: input.attribution?.referrer || null, firstTouchSource: input.attribution?.first_touch_source || null, lastTouchSource: input.attribution?.last_touch_source || null });
   if (input.contactId) await db.insert(timelineEvents).values({ contactId: input.contactId, type: "FORM_SUBMITTED", detail: `Form submission ${insertId(result)} stored.` });
   return { id: insertId(result), persisted: true };
 }
 
-export async function saveFormSubmission(input: { formId?: number; contactId?: number; data: Record<string, unknown>; attribution?: Record<string, string> }) {
+export async function saveFormSubmission(input: { formId?: number; formName?: string; contactId?: number; data: Record<string, unknown>; attribution?: Record<string, string> }) {
   return createFormSubmission(input);
 }
 
@@ -256,28 +256,33 @@ export async function getCrmOverview() {
   return { leads: leadRows, contacts: contactRows, appointments: appointmentRows, tasks: taskRows, forms: formRows, formSubmissions: submissionRows, automations: automationRows, totals: { total: leadRows.length, newLeads: count("new_lead"), qualified: count("qualified"), highIntent: contactRows.filter((contact) => contact.leadScore >= 81).length, audits: auditRows.length, booked, showed: count("showed"), noShows: appointmentRows.filter((appointment) => appointment.status === "no_show").length, won: count("won"), lost: count("lost"), conversionRate: leadRows.length ? Math.round((booked / leadRows.length) * 100) : 0 } };
 }
 
-export async function getCrmLeadDirectory(input: { search?: string; stage?: string; niche?: string; source?: string; minScore?: number; maxScore?: number; booked?: boolean; page?: number; pageSize?: number }) {
+export async function getCrmLeadDirectory(input: { search?: string; stage?: string; niche?: string; source?: string; minScore?: number; maxScore?: number; dateFrom?: string; dateTo?: string; booked?: boolean; page?: number; pageSize?: number }) {
   const db = await getDb();
   if (!db) return { rows: [], total: 0, page: input.page || 1, pageSize: input.pageSize || 25 };
-  const [leadRows, contactRows, appointmentRows] = await Promise.all([db.select().from(leads).orderBy(desc(leads.createdAt)).limit(5000), db.select().from(contacts).orderBy(desc(contacts.createdAt)).limit(5000), db.select().from(appointments).limit(5000)]);
+  const [leadRows, contactRows, appointmentRows, submissionRows] = await Promise.all([db.select().from(leads).orderBy(desc(leads.createdAt)).limit(5000), db.select().from(contacts).orderBy(desc(contacts.createdAt)).limit(5000), db.select().from(appointments).limit(5000), db.select().from(formSubmissions).orderBy(desc(formSubmissions.createdAt)).limit(10000)]);
   const contactsById = new Map(contactRows.map((contact) => [contact.id, contact]));
+  const latestSubmissionByContact = new Map<number, typeof submissionRows[number]>();
+  for (const submission of submissionRows) if (submission.contactId && !latestSubmissionByContact.has(submission.contactId)) latestSubmissionByContact.set(submission.contactId, submission);
   const bookedContactIds = new Set(appointmentRows.filter((appointment) => ["booked", "showed"].includes(appointment.status)).map((appointment) => appointment.contactId));
   const search = input.search?.trim().toLowerCase();
   const filtered = leadRows.filter((lead) => {
     const contact = contactsById.get(lead.contactId);
     if (!contact) return false;
     const haystack = `${contact.firstName} ${contact.lastName || ""} ${contact.email} ${contact.phone || ""} ${contact.niche || ""} ${contact.offer || ""}`.toLowerCase();
-    return (!search || haystack.includes(search)) && (!input.stage || lead.stage === input.stage) && (!input.niche || contact.niche === input.niche) && (!input.source || lead.source === input.source) && (input.minScore === undefined || lead.leadScore >= input.minScore) && (input.maxScore === undefined || lead.leadScore <= input.maxScore) && (input.booked === undefined || bookedContactIds.has(contact.id) === input.booked);
+    const submittedAt = latestSubmissionByContact.get(contact.id)?.createdAt || lead.createdAt;
+    const dateFrom = input.dateFrom ? new Date(input.dateFrom) : undefined;
+    const dateTo = input.dateTo ? new Date(input.dateTo) : undefined;
+    return (!search || haystack.includes(search)) && (!input.stage || lead.stage === input.stage) && (!input.niche || contact.niche === input.niche) && (!input.source || lead.source === input.source) && (input.minScore === undefined || lead.leadScore >= input.minScore) && (input.maxScore === undefined || lead.leadScore <= input.maxScore) && (!dateFrom || submittedAt >= dateFrom) && (!dateTo || submittedAt <= dateTo) && (input.booked === undefined || bookedContactIds.has(contact.id) === input.booked);
   });
   const pageSize = Math.min(100, Math.max(1, input.pageSize || 25));
   const page = Math.max(1, input.page || 1);
-  return { rows: filtered.slice((page - 1) * pageSize, page * pageSize).map((lead) => ({ lead, contact: contactsById.get(lead.contactId), booked: bookedContactIds.has(lead.contactId) })), total: filtered.length, page, pageSize };
+  return { rows: filtered.slice((page - 1) * pageSize, page * pageSize).map((lead) => ({ lead, contact: contactsById.get(lead.contactId), submission: latestSubmissionByContact.get(lead.contactId), booked: bookedContactIds.has(lead.contactId) })), total: filtered.length, page, pageSize };
 }
 
 export async function getLeadProfile(contactId: number) {
   const db = await getDb();
   if (!db) return null;
-  const [contact, lead, submissions, audits, timeline, appointmentRows, conversationRows] = await Promise.all([
+  const [contact, lead, submissions, audits, timeline, appointmentRows, conversationRows, taskRows] = await Promise.all([
     db.select().from(contacts).where(eq(contacts.id, contactId)).limit(1),
     db.select().from(leads).where(eq(leads.contactId, contactId)).limit(1),
     db.select().from(formSubmissions).where(eq(formSubmissions.contactId, contactId)).orderBy(desc(formSubmissions.createdAt)),
@@ -285,10 +290,11 @@ export async function getLeadProfile(contactId: number) {
     db.select().from(timelineEvents).where(eq(timelineEvents.contactId, contactId)).orderBy(desc(timelineEvents.createdAt)),
     db.select().from(appointments).where(eq(appointments.contactId, contactId)).orderBy(desc(appointments.createdAt)),
     db.select().from(conversations).where(eq(conversations.contactId, contactId)).orderBy(desc(conversations.lastMessageAt)),
+    db.select().from(tasks).where(eq(tasks.contactId, contactId)).orderBy(desc(tasks.createdAt)),
   ]);
   const conversationIds = conversationRows.map((conversation) => conversation.id);
   const messages = conversationIds.length ? await db.select().from(conversationMessages).orderBy(desc(conversationMessages.createdAt)) : [];
-  return { contact: contact[0], lead: lead[0], submissions, audits, timeline, appointments: appointmentRows, conversations: conversationRows.map((conversation) => ({ ...conversation, messages: messages.filter((message) => message.conversationId === conversation.id) })) };
+  return { contact: contact[0], lead: lead[0], submissions, audits, timeline, appointments: appointmentRows, tasks: taskRows, conversations: conversationRows.map((conversation) => ({ ...conversation, messages: messages.filter((message) => message.conversationId === conversation.id) })) };
 }
 
 export async function exportCrmCsv() {

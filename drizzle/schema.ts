@@ -193,6 +193,7 @@ export const forms = mysqlTable("forms", {
 export const formSubmissions = mysqlTable("form_submissions", {
   id: int("id").autoincrement().primaryKey(),
   formId: int("formId"),
+  formName: varchar("formName", { length: 180 }),
   contactId: int("contactId"),
   data: text("data").notNull(),
   utmSource: varchar("utmSource", { length: 180 }),
